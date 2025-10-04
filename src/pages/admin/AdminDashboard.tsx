@@ -35,17 +35,25 @@ const AdminDashboard = () => {
   ];
 
   const handleApprove = (id: number) => {
+    const comment = prompt("Add a comment for approval (optional):");
     setLoading(true);
     setTimeout(() => {
       toast.success("Claim approved successfully");
+      // In real app, remove from pending and add to history
       setLoading(false);
     }, 500);
   };
 
   const handleReject = (id: number) => {
+    const comment = prompt("Please provide a reason for rejection (required):");
+    if (!comment || comment.trim() === "") {
+      toast.error("Comment is required for rejection");
+      return;
+    }
     setLoading(true);
     setTimeout(() => {
-      toast.success("Claim rejected");
+      toast.success("Claim rejected with comment");
+      // In real app, remove from pending and add to history with comment
       setLoading(false);
     }, 500);
   };
@@ -59,7 +67,7 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout title="Admin Dashboard" onBack={() => navigate("/role-select")}>
       {/* Navigation Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         <Button
           variant={selectedView === "approvals" ? "default" : "outline"}
           onClick={() => setSelectedView("approvals")}
@@ -83,6 +91,18 @@ const AdminDashboard = () => {
         >
           <Bell className="w-4 h-4 mr-2" />
           Notifications
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => navigate("/admin/manage-users")}
+        >
+          Manage Users
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => navigate("/admin/approved-claims")}
+        >
+          Approved Claims
         </Button>
       </div>
 

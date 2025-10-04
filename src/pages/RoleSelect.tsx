@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowLeft, Shield, Users, User } from "lucide-react";
 import { toast } from "sonner";
 import LoadingScreen from "@/components/LoadingScreen";
+import aprovaLogo from "@/assets/aprova-logo.png";
 
 const RoleSelect = () => {
   const navigate = useNavigate();
@@ -69,7 +70,16 @@ const RoleSelect = () => {
       </Button>
 
       <div className="max-w-4xl mx-auto pt-20 space-y-8">
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="w-20 h-20 rounded-full bg-primary shadow-glow flex items-center justify-center">
+              <img 
+                src={aprovaLogo} 
+                alt="APROVA Logo" 
+                className="w-12 h-12 object-contain filter brightness-0 invert"
+              />
+            </div>
+          </div>
           <h1 className="text-4xl font-heading font-bold text-gradient-primary">
             Select Your Role
           </h1>

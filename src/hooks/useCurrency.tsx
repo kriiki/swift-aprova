@@ -13,7 +13,17 @@ interface Country {
 
 export const useCurrency = () => {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
-  const [selectedCurrency, setSelectedCurrency] = useState<string>("USD");
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(() => {
+    // Check for admin role (default INR)
+    const userRole = localStorage.getItem("userRole");
+    if (userRole === "admin") return "INR";
+    
+    // Check for user nationality
+    const userNationality = localStorage.getItem("userNationality");
+    if (userNationality) return userNationality;
+    
+    return "USD";
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

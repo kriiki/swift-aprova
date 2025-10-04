@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrency } from "@/hooks/useCurrency";
+import aprovaLogo from "@/assets/aprova-logo.png";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { currencies } = useCurrency();
+  const { currencies, loading: currenciesLoading, setSelectedCurrency } = useCurrency();
   const [isApprovalPending, setIsApprovalPending] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [loginData, setLoginData] = useState({ name: "", password: "", firmCode: "" });
   const [signupData, setSignupData] = useState({
     name: "",
@@ -22,32 +25,97 @@ const Auth = () => {
     firmCode: "",
     nationality: "",
   });
+  const [countries, setCountries] = useState<Array<{ name: string; code: string }>>([]);
+
+  useEffect(() => {
+    if (currencies.length > 0) {
+      // Create a map of currency codes to country names
+      fetch("https://restcountries.com/v3.1/all?fields=name,currencies")
+        .then(res => res.json())
+        .then((data: any[]) => {
+          const countryList = data.map(country => ({
+            name: country.name.common,
+            code: country.currencies ? Object.keys(country.currencies)[0] : ""
+          })).filter(c => c.code).sort((a, b) => a.name.localeCompare(b.name));
+          setCountries(countryList);
+        });
+    }
+  }, [currencies]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate name (letters only)
+    if (!/^[a-zA-Z\s]+$/.test(loginData.name)) {
+      toast.error("Name must contain letters only");
+      return;
+    }
+    
+    // Validate password length
+    if (loginData.password.length <= 8) {
+      toast.error("Password must exceed 8 characters");
+      return;
+    }
+    
+    // Validate firm code format
+    const firstChar = loginData.firmCode.charAt(0).toUpperCase();
+    if (!['E', 'M', 'A'].includes(firstChar)) {
+      toast.error("Firm code must start with E (Employee), M (Manager), or A (Admin)");
+      return;
+    }
+    
     if (!loginData.name || !loginData.password || !loginData.firmCode) {
       toast.error("Please fill all fields");
       return;
     }
-    // Simulate login
-    localStorage.setItem("user", JSON.stringify(loginData));
-    navigate("/role-select");
+    
+    setLoading(true);
+    setTimeout(() => {
+      localStorage.setItem("user", JSON.stringify(loginData));
+      setLoading(false);
+      navigate("/role-select");
+    }, 500);
   };
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signupData.name || !signupData.email || !signupData.firmCode) {
+    
+    // Validate name (letters only)
+    if (!/^[a-zA-Z\s]+$/.test(signupData.name)) {
+      toast.error("Name must contain letters only");
+      return;
+    }
+    
+    // Validate firm code format
+    const firstChar = signupData.firmCode.charAt(0).toUpperCase();
+    if (!['E', 'M', 'A'].includes(firstChar)) {
+      toast.error("Firm code must start with E (Employee), M (Manager), or A (Admin)");
+      return;
+    }
+    
+    if (!signupData.name || !signupData.email || !signupData.firmCode || !signupData.nationality) {
       toast.error("Please fill all required fields");
       return;
     }
+    
+    // Set currency based on nationality
+    setSelectedCurrency(signupData.nationality);
+    localStorage.setItem("userNationality", signupData.nationality);
+    
     setIsApprovalPending(true);
     toast.success("Signup request submitted! Approval may take 2-3 working days.");
   };
 
-  const handleSetPassword = () => {
+  const handleSetPassword = (password: string) => {
+    if (password.length <= 8) {
+      toast.error("Password must exceed 8 characters");
+      return;
+    }
     toast.success("Password set successfully! You can now login.");
     setIsApprovalPending(false);
   };
+  
+  if (loading || currenciesLoading) return <LoadingScreen />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center p-4">
@@ -64,20 +132,12 @@ const Auth = () => {
         {/* Logo Header */}
         <div className="text-center space-y-2">
           <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-primary-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
+              <img 
+                src={aprovaLogo} 
+                alt="APROVA Logo" 
+                className="w-10 h-10 object-contain filter brightness-0 invert"
+              />
             </div>
           </div>
           <h2 className="text-3xl font-heading font-bold text-gradient-primary">APROVA</h2>
@@ -95,9 +155,19 @@ const Auth = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Set Password (After Approval)</Label>
-                <Input type="password" placeholder="Enter password" />
+                <Input 
+                  type="password" 
+                  placeholder="Enter password (more than 8 characters)" 
+                  id="approval-password"
+                />
               </div>
-              <Button onClick={handleSetPassword} className="w-full bg-gradient-primary">
+              <Button 
+                onClick={() => {
+                  const input = document.getElementById("approval-password") as HTMLInputElement;
+                  handleSetPassword(input?.value || "");
+                }} 
+                className="w-full bg-gradient-primary"
+              >
                 Set Password
               </Button>
             </CardContent>
@@ -192,12 +262,12 @@ const Auth = () => {
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select nationality" />
+                          <SelectValue placeholder="Select country" />
                         </SelectTrigger>
                         <SelectContent>
-                          {currencies.slice(0, 20).map((curr) => (
-                            <SelectItem key={curr.code} value={curr.code}>
-                              {curr.code}
+                          {countries.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {country.name}
                             </SelectItem>
                           ))}
                         </SelectContent>

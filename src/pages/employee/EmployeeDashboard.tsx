@@ -91,8 +91,8 @@ const EmployeeDashboard = () => {
                 <Plus className="w-4 h-4 mr-2" />
                 Submit New Claim
               </Button>
-              <Button variant="outline" onClick={() => navigate("/employee/expenses")}>
-                View All Expenses
+              <Button variant="outline" onClick={() => navigate("/employee/approved")}>
+                View All Approved Expenses
               </Button>
             </CardContent>
           </Card>
@@ -161,7 +161,9 @@ const EmployeeDashboard = () => {
                 <p className="font-medium">USD</p>
               </div>
             </div>
-            <Button variant="outline">Edit Profile</Button>
+            <Button variant="outline" onClick={() => navigate("/employee/edit-profile")}>
+              Edit Profile
+            </Button>
           </CardContent>
         </Card>
       )}

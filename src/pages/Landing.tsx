@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import aprovaLogo from "@/assets/aprova-logo.png";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -16,20 +17,12 @@ const Landing = () => {
       <div className={`text-center space-y-8 transition-all duration-700 ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         {/* Logo Circle */}
         <div className="flex justify-center">
-          <div className="relative w-32 h-32 rounded-full bg-gradient-primary shadow-glow flex items-center justify-center group cursor-pointer transition-transform duration-300 hover:scale-110">
-            <svg
-              className="w-16 h-16 text-primary-foreground"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+          <div className="relative w-32 h-32 rounded-full bg-primary shadow-glow flex items-center justify-center group cursor-pointer transition-transform duration-300 hover:scale-110">
+            <img 
+              src={aprovaLogo} 
+              alt="APROVA Logo" 
+              className="w-20 h-20 object-contain filter brightness-0 invert"
+            />
             <div className="absolute inset-0 rounded-full bg-primary-glow opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
           </div>
         </div>

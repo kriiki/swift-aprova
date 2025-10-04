@@ -27,14 +27,21 @@ const ManagerDashboard = () => {
     setLoading(true);
     setTimeout(() => {
       toast.success("Claim approved successfully");
+      // In real app, remove from pending and add to history
       setLoading(false);
     }, 500);
   };
 
   const handleReject = (id: number) => {
+    const comment = prompt("Please provide a reason for rejection (required):");
+    if (!comment || comment.trim() === "") {
+      toast.error("Comment is required for rejection");
+      return;
+    }
     setLoading(true);
     setTimeout(() => {
-      toast.success("Claim rejected");
+      toast.success("Claim rejected with comment");
+      // In real app, remove from pending and add to history with comment
       setLoading(false);
     }, 500);
   };
